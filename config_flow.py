@@ -13,31 +13,21 @@ from homeassistant.exceptions import HomeAssistantError
 
 from .const import DOMAIN
 
+from .amber_valley_bin_dates_scraper import AmberValleyBinDatesScraper
+
 _LOGGER = logging.getLogger(__name__)
 
-# TODO adjust the data schema to the data that you need
-STEP_USER_DATA_SCHEMA = vol.Schema(
+STEP_POSTCODE_DATA_SCHEMA = vol.Schema(
     {
-        vol.Required("host"): str,
-        vol.Required("username"): str,
-        vol.Required("password"): str,
+        vol.Required("postcode"): str,
     }
 )
 
-
-class PlaceholderHub:
-    """Placeholder class to make tests pass.
-
-    TODO Remove this placeholder class and replace with things from your PyPI package.
-    """
-
-    def __init__(self, host: str) -> None:
-        """Initialize."""
-        self.host = host
-
-    async def authenticate(self, username: str, password: str) -> bool:
-        """Test if we can authenticate with the host."""
-        return True
+STEP_SELECTOR_DATA_SCHEMA = vol.Schema(
+    {
+        vol.Required("property_selector"): str,
+    }
+)
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
@@ -72,33 +62,47 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
-        """Handle the initial step."""
+    def __init__(self):
+        self.bin_date_scraper = AmberValleyBinDatesScraper()
+        self.full_property_list = None
+
+    async def async_step_postcode(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Get the postcode"""
         if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=STEP_USER_DATA_SCHEMA
-            )
+            return self.async_show_form(step_id="postcode", data_schema=STEP_POSTCODE_DATA_SCHEMA)
 
         errors = {}
+        self.full_property_list = self.bin_date_scraper.query_properties_by_postcode(user_input['postcode'])
 
-        try:
-            info = await validate_input(self.hass, user_input)
-        except CannotConnect:
-            errors["base"] = "cannot_connect"
-        except InvalidAuth:
-            errors["base"] = "invalid_auth"
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors["base"] = "unknown"
-        else:
-            return self.async_create_entry(title=info["title"], data=user_input)
+    async def async_step_selector(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Get the property selector"""
+        if user_input is None:
+            return self.async_show_form(step_id="selector", data_schema=STEP_SELECTOR_DATA_SCHEMA)
 
-        return self.async_show_form(
-            step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
+        errors = {}
+        property_id = self.bin_date_scraper.get_refuse_collection_id(self.full_property_list, user_input['property_selector'])
+        if isinstance(property_id, int):
+            if property_id == -1:
+                errors['property_selector'] = 'property_selector_no_matches'
+            elif property_id == 0:
+                errors['property_selector'] = 'property_selector_multiple_matches'
+        elif not isinstance(property_id, str):
+            errors['base'] = "property_selector_unknown"
+
+        refuse_dates = self.bin_date_scraper.query_refuse_dates_by_property_id(property_id)
+        if not refuse_dates:
+            errors['base'] = 'api_refuse_unknown'
+
+        if len(errors.keys()) > 0:
+            return self.async_show_form(step_id="selector", data_schema=STEP_SELECTOR_DATA_SCHEMA, errors=errors)
+
+        return self.async_create_entry(
+            title="Amber Valley Bin Dates",
+            data={
+                "postcode": user_input["postcode"],
+                "property_selector": user_input["property_selector"]
+            },
         )
-
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
