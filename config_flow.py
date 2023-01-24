@@ -44,6 +44,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Get the postcode"""
         _LOGGER.warning("Step User")
+        await self.async_set_unique_id("BPIT_AmberValleyBinDates")
         return await self.async_step_postcode(user_input)
 
     async def async_step_postcode(self, user_input: dict[str, Any] | None = None) -> FlowResult:
@@ -98,11 +99,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if len(errors.keys()) > 0:
             return self.async_show_form(step_id="selector", data_schema=vol.Schema(STEP_SELECTOR_DATA_SCHEMA), errors=errors)
 
+
         return self.async_create_entry(
             title="Amber Valley Bin Dates",
             data={
                 "postcode": self.postcode,
-                "property_selector": user_input["property_selector"]
+                "property_selector": user_input['property_selector'],
+                "property_uprn": property_id
             },
         )
 

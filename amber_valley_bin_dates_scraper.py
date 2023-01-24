@@ -1,5 +1,4 @@
-import asyncio
-
+from datetime import datetime
 import aiohttp
 
 
@@ -41,9 +40,9 @@ class AmberValleyBinDatesScraper:
 
                 refuse_collection_info = await response.json()
                 return {
-                    "recycling": refuse_collection_info['recyclingNextDate'],
-                    "domestic": refuse_collection_info['refuseNextDate'],
-                    "garden": refuse_collection_info['greenNextDate']
+                    "recycling": datetime.strptime(refuse_collection_info['recyclingNextDate'], "%Y-%m-%dT%H:%M:%S"),
+                    "domestic": datetime.strptime(refuse_collection_info['refuseNextDate'], "%Y-%m-%dT%H:%M:%S"),
+                    "garden": datetime.strptime(refuse_collection_info['greenNextDate'], "%Y-%m-%dT%H:%M:%S")
                 }
 
     def get_refuse_collection_id(self, property_list, property_selector):
@@ -61,3 +60,10 @@ class AmberValleyBinDatesScraper:
 
         matched_property = matching_addresses[0]
         return matched_property['uprn']
+
+# async def main():
+#     t = AmberValleyBinDatesScraper()
+#     t.configUprn = "100030002069"
+#     print(await t.query_refuse_dates_by_property_id())
+#
+# asyncio.run(main())
