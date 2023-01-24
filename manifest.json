@@ -3,7 +3,7 @@
   "name": "amber_valley_bin_dates",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/amber_valley_bin_dates",
-  "requirements": ["aiohttp"],
+  "requirements": [],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
@@ -11,5 +11,6 @@
   "codeowners": [
     "@brodie124"
   ],
-  "iot_class": "cloud_polling"
+  "iot_class": "cloud_polling",
+  "version" : "1.0.0"
 }
