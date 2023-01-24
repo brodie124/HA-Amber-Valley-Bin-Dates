@@ -60,7 +60,7 @@ class BinDatesCoordinator(DataUpdateCoordinator):
             # Name of the data. For logging purposes.
             name="Amber Valley Bin Dates Scraper",
             # Polling interval. Will only be polled if there are subscribers.
-            update_interval=timedelta(seconds=20),
+            update_interval=timedelta(seconds=500),
         )
         self.bin_dates_api = bin_dates_api
 
