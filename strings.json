@@ -1,11 +1,16 @@
 {
   "config": {
     "step": {
-      "user": {
+      "postcode": {
+        "title": "Enter Postcode",
+        "description": "Please enter your postcode",
         "data": {
-          "host": "[%key:common::config_flow::data::host%]",
-          "username": "[%key:common::config_flow::data::username%]",
-          "password": "[%key:common::config_flow::data::password%]"
+          "postcode": "Postcode"
+        }
+      },
+      "selector": {
+        "data": {
+          "property_selector": "Property Selector"
         }
       }
     },
@@ -13,14 +18,17 @@
       "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
       "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]",
       "unknown": "[%key:common::config_flow::error::unknown%]",
+      "postcode_no_matches": "No addresses were found with the given postcode. Please check the format of the postcode and try again.",
       "property_selector_no_matches": "No addresses starting with the given property selector were found.",
       "property_selector_multiple_matches": "Multiple addresses starting with the given property selector were found.",
       "property_selector_unknown": "An unknown error occurred whilst attempting to match addresses.",
-      "api_refuse_unknown": "An unknown error occurred whilst fetching the refuse collection dates."
+      "api_refuse_unknown": "An unknown error occurred whilst fetching the refuse collection dates.",
+      "api_unavailable": "The Amber Valley Borough Council API is currently unavailable. Please try again later."
 
     },
     "abort": {
-      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]"
+      "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+       "api_unavailable": "The Amber Valley Borough Council API is currently unavailable. Please try again later."
     }
   }
 }

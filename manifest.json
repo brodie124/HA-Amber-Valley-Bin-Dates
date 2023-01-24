@@ -3,7 +3,7 @@
   "name": "amber_valley_bin_dates",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/amber_valley_bin_dates",
-  "requirements": [],
+  "requirements": ["aiohttp"],
   "ssdp": [],
   "zeroconf": [],
   "homekit": {},
