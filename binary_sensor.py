@@ -128,7 +128,13 @@ class BinBase(CoordinatorEntity, BinarySensorEntity):
             _LOGGER.error("Coordinator data is type none!")
             return
 
-        self._attr_is_on = _LAST_REFUSE_DATES[self.bin_type].date() == datetime.today().date()
+        today = datetime.today().date()
+        bin_date = _LAST_REFUSE_DATES[self.bin_type].date()
+        days_until = (bin_date - today).days
+
+        _LOGGER.info("Days left until bin collection for '%s' type: %s days" % (self.bin_type, days_until))
+
+        self._attr_is_on = days_until < 7
         self.async_write_ha_state()
 
     def async_will_remove_from_hass(self) -> None:
